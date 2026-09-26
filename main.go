@@ -1,20 +1,28 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 type Link struct {
 	Code   string
 	URL    string
 	Clicks int
 }
+type LinkStore struct {
+	mu    sync.Mutex
+	links map[int]*Link
+}
 
+func NewLinkStore() *LinkStore {
+	return &LinkStore{
+		links: map[int]*Link{},
+	}
+}
 func main() {
 
-	link := Link{
-		Code:   "abc123",
-		URL:    "http://go.dev",
-		Clicks: 0,
-	}
+	store := NewLinkStore()
 
-	fmt.Println(link)
+	fmt.Println(store)
 }
