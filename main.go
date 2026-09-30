@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -12,8 +11,8 @@ type Link struct {
 }
 
 type LinkStore struct {
-	mu    sync.Mutex
 	links map[string]*Link
+	mu    sync.RWMutex
 }
 
 func NewLinkStore() *LinkStore {
@@ -23,6 +22,8 @@ func NewLinkStore() *LinkStore {
 }
 
 func (s *LinkStore) Create(code, url string) *Link {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	l := &Link{
 		Code: code,
 		URL:  url,
@@ -31,9 +32,29 @@ func (s *LinkStore) Create(code, url string) *Link {
 	return l
 }
 
-func main() {
-	store := NewLinkStore()
-	store.Create("abc", "www.jumia.com/computers/windows/laptop/hp/hp15s")
+func (s *LinkStore) Get(code string) (*Link, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	l, ok := s.links[code]
+	if !ok {
+		return nil, false
+	}
 
-	fmt.Println(store)
+	return l, true
+
+}
+
+func (s *LinkStore) IncrementClick(code string) (*Link, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	l, ok := s.links[code]
+	if !ok {
+		return nil, false
+	}
+	l.Clicks++
+	return l, true
+}
+
+func main() {
+
 }
