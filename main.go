@@ -1,7 +1,10 @@
 package main
 
 import (
+	"net/http"
 	"sync"
+
+	"github.com/go-chi/chi"
 )
 
 type Link struct {
@@ -57,4 +60,7 @@ func (s *LinkStore) IncrementClicks(code string) (*Link, bool) {
 
 func main() {
 
+	r := chi.NewRouter()
+
+	http.ListenAndServe(":8080", r)
 }
