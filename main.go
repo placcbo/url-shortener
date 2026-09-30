@@ -44,7 +44,7 @@ func (s *LinkStore) Get(code string) (*Link, bool) {
 
 }
 
-func (s *LinkStore) IncrementClick(code string) (*Link, bool) {
+func (s *LinkStore) IncrementClicks(code string) (*Link, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	l, ok := s.links[code]
