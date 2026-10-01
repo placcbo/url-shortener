@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"sync"
 
@@ -59,8 +60,34 @@ func (s *LinkStore) IncrementClicks(code string) (*Link, bool) {
 }
 
 func main() {
+	store := NewLinkStore()
 
 	r := chi.NewRouter()
+	r.Post("/links", func(w http.ResponseWriter, r *http.Request) {
+		var l Link
 
+		err := json.NewDecoder(r.Body).Decode(&l)
+		if err != nil {
+			http.Error(w, "Invalid JSON", http.StatusBadRequest)
+			return
+		}
+
+		link := store.Create(l.Code, l.URL)
+
+		json.NewEncoder(w).Encode(link)
+	})
+
+	// get code
+
+	r.Get("/link/{code}", func(w http.ResponseWriter, r *http.Request) {
+		code := chi.URLParam(r, "code")
+		link, ok := store.IncrementClicks(code)
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+		http.Redirect(w, r, link.URL, http.StatusNotFound)
+
+	})
 	http.ListenAndServe(":8080", r)
 }
